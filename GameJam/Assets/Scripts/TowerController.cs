@@ -3,7 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 
-public class TowerController : MonoBehaviour
+public interface ICharacterFunc
+{
+    void Damaged(int nDamage);
+
+    Transform GetTransform();
+
+    bool IsDead();
+}
+
+public class TowerController : MonoBehaviour, ICharacterFunc
 {
     public enum eTowerState
     {
@@ -47,7 +56,7 @@ public class TowerController : MonoBehaviour
             {
                 if(m_enemy != null)
                 {
-                    Vector2 direction = m_enemy.transform.position - this.transform.position;
+                    Vector2 direction = (m_enemy.transform.position - this.transform.position).normalized;
                     bullet.transform.position = m_shootPos.position;
                     bullet.Setup(direction);
                     bullet.gameObject.SetActive(true);
@@ -69,15 +78,20 @@ public class TowerController : MonoBehaviour
         m_nHp = m_nTotalHp;
 
         m_nDamage = GameManager.Instance.m_nTowerDamageLevel * GameManager.nTowerDamageIncrease;
-        m_fAttackSpeed = 1f + GameManager.Instance.m_nTowerAttackSpeedLevel * GameManager.fTowerAttackSpeedIncrease;
+        m_fAttackSpeed = 1f - GameManager.Instance.m_nTowerAttackSpeedLevel * GameManager.fTowerAttackSpeedIncrease;
         m_fPresentAttackSpeed = m_fAttackSpeed;
-        m_fAttackRange = 1f;
+        //m_fAttackRange = 2f;
 
         m_eState = eTowerState.Idle;
     }
 
     private void Update()
     {
+        if(m_bDead == true)
+        {
+            return;
+        }
+
         switch(m_eState)
         {
             case eTowerState.Idle:
@@ -127,5 +141,24 @@ public class TowerController : MonoBehaviour
                 }
                 break;
         }
+    }
+
+    public void Damaged(int nDamage)
+    {
+        m_nHp -= nDamage;
+        if(m_nHp <= 0)
+        {
+            m_bDead = true;
+        }
+    }
+
+    public Transform GetTransform()
+    {
+        return this.transform;
+    }
+
+    public bool IsDead()
+    {
+        return m_bDead;
     }
 }

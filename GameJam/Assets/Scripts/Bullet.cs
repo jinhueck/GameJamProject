@@ -9,6 +9,8 @@ public class Bullet : MonoBehaviour
 
     public Rigidbody2D m_rigid = null;
 
+    public float m_fMoveSpeed = 10f;
+
     public void Setup(Vector2 direction)
     {
         m_Direction = direction;
@@ -16,9 +18,9 @@ public class Bullet : MonoBehaviour
     }
 
     public Vector2 m_Direction = Vector2.zero;
-    void Update()
+    void FixedUpdate()
     {
-        m_rigid.velocity = m_Direction;
+        m_rigid.velocity = m_Direction * Time.deltaTime * m_fMoveSpeed;
         if (m_fCoolTime >= 5f)
         {
             DestroyBullet();
